@@ -5,6 +5,8 @@ import { Briefcase, ChevronRight } from "@gravity-ui/icons";
 import Link from "next/link";
 
 export default function ApplicationTable({ applications = [] }) {
+  console.log("APPLICATIONS PROP:", applications);
+  console.log("IS ARRAY:", Array.isArray(applications));
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-zinc-800 bg-[#18181b]">
       <table className="w-full text-left border-collapse">

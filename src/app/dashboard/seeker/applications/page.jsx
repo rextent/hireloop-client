@@ -6,7 +6,7 @@ import ApplicationTable from './ApplicationTable';
 
 const ApplicationsPage = async () => {
   const user = await getUserSession();
-  
+
   if (!user) {
     return (
       <div className="p-6 text-center text-default-500">
@@ -17,6 +17,8 @@ const ApplicationsPage = async () => {
 
   // ডেটাবেস থেকে ডেটা ফেচ করা
   const rawJobs = await getApplicationsByApplicant(user.id);
+  console.log("RAW JOBS:", rawJobs);
+  console.log("IS ARRAY:", Array.isArray(rawJobs));
 
   // ⚠️ ম্যাজিক ফিক্স: MongoDB ObjectIds এবং Dates কে প্লেন স্ট্রিং এ কনভার্ট করা
   // এর ফলে ক্লায়েন্ট কম্পোনেন্টে আর কোনো কালেকশন বা সিরিয়ালাইজেশন এরর আসবে না

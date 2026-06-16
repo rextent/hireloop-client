@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
 import dns from "dns";
+import { admin } from "better-auth/plugins";
 
 // DNS রিজল্যুশন ফিক্সড করা (আপনার রিকোয়েস্ট অনুযায়ী)
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -50,4 +51,7 @@ export const auth = betterAuth({
       plan: { type: "string", defaultValue: "seeker_free" },
     },
   },
+  plugins:[
+    admin()
+  ]
 });
