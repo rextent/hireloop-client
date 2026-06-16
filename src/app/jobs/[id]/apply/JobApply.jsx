@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Person, At, Link as LinkIcon, Check } from '@gravity-ui/icons';
 import { createApplication } from '@/lib/actions/applications';
-import { getApplicationsByApplicant } from '@/lib/api/applications';
+// import { getApplicationsByApplicant } from '@/lib/api/applications';
 
-const JobApply = ({ job, applicant }) => {
+const JobApply = ({ job, applicant, alreadyApplied }) => {
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: applicant?.name || '',
@@ -20,22 +20,29 @@ const JobApply = ({ job, applicant }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
-    const [alreadyApplied, setAlreadyApplied] = useState(false); // নতুন স্টেট
+    // const [alreadyApplied, setAlreadyApplied] = useState(false); // নতুন স্টেট
 
-    // জবে অলরেডি অ্যাপ্লাই করা আছে কি না তা চেক করার জন্য
-    useEffect(() => {
-        const checkApplication = async () => {
-            try {
-                const apps = await getApplicationsByApplicant(applicant.id);
-                // বর্তমান জবের ID এর সাথে চেক করুন
-                const exists = apps.find(app => app.jobId === (job._id || job.id));
-                if (exists) setAlreadyApplied(true);
-            } catch (err) {
-                console.error("Error checking applications:", err);
-            }
-        };
-        checkApplication();
-    }, [applicant.id, job._id, job.id]);
+//     // জবে অলরেডি অ্যাপ্লাই করা আছে কি না তা চেক করার জন্য
+//     useEffect(() => {
+//     const checkApplication = async () => {
+//         try {
+//             if (!applicantId) return;
+
+//             const apps = await getApplicationsByApplicant(applicantId);
+
+//             const exists = apps.find(
+//                 app => app.jobId === (job._id || job.id)
+//             );
+
+//             if (exists) setAlreadyApplied(true);
+
+//         } catch (err) {
+//             console.error("Error checking applications:", err);
+//         }
+//     };
+
+//     checkApplication();
+// }, [applicantId, job._id, job.id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -60,7 +67,7 @@ const JobApply = ({ job, applicant }) => {
                 jobId: job._id || job.id,
                 jobTitle: job.title,
                 companyName: job.companyName,
-                applicantId: applicant.id,
+                applicantId: applicant._id || applicant.id, // ✅
                 applicantName: formData.name,
                 applicantEmail: formData.email,
                 phone: formData.phone,
@@ -69,6 +76,7 @@ const JobApply = ({ job, applicant }) => {
                 coverLetter: formData.coverLetter,
                 status: 'pending'
             };
+            console.log("PAYLOAD:", applicationPayload);
 
             const res = await createApplication(applicationPayload);
 
@@ -119,16 +127,16 @@ const JobApply = ({ job, applicant }) => {
                     <input type="text" name="name" value={formData.name} readOnly className="h-14 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-12 pr-4 text-zinc-500 outline-none" />
                     <input type="email" name="email" value={formData.email} readOnly className="h-14 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-12 pr-4 text-zinc-500 outline-none" />
                 </div>
-                
+
                 <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} className="h-14 w-full rounded-2xl border border-zinc-200 px-4 outline-none" required />
                 <input type="url" name="resumeUrl" placeholder="Resume URL" value={formData.resumeUrl} onChange={handleChange} className="h-14 w-full rounded-2xl border border-zinc-200 px-4 outline-none" required />
                 <textarea name="coverLetter" rows="6" placeholder="Why should we hire you?" value={formData.coverLetter} onChange={handleChange} className="w-full rounded-2xl border border-zinc-200 p-4 outline-none" required></textarea>
 
                 {error && <div className="p-4 text-sm text-red-500 bg-red-500/10 rounded-2xl">{error}</div>}
 
-                <button 
-                    type="submit" 
-                    disabled={loading || alreadyApplied} 
+                <button
+                    type="submit"
+                    disabled={loading || alreadyApplied}
                     className={`h-14 w-full rounded-2xl font-bold text-white transition-all ${alreadyApplied ? 'bg-zinc-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
                     {alreadyApplied ? "Already Applied" : (loading ? "Submitting..." : "Submit Application")}

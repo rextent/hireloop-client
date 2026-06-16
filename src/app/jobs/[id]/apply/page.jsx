@@ -33,6 +33,13 @@ const ApplyPage = async ({ params }) => {
   }
 
   const userId = user?._id || user?.id;
+  const normalizedUser = {
+    ...user,
+    id: user?._id || user?.id,
+  };
+  console.log("USER OBJECT:", user);
+
+
 
   // ২. অ্যাপ্লিকেশন এবং জব ফেচিং
   const [applications, job] = await Promise.all([
@@ -40,12 +47,16 @@ const ApplyPage = async ({ params }) => {
     getJobById(id)
   ]);
 
+  const alreadyApplied = applications.some(
+    app => app.jobId === id
+  );
+
   const totalApplications = Array.isArray(applications) ? applications.length : 0;
 
   // ৩. লেটেস্ট প্ল্যান ডেটা ফেচিং
   const planId = user?.plan || 'seeker_free';
   const fetchedPlan = await getPlanById(planId);
-  
+
   // গুরুত্বপূর্ণ ডিবাগিং: ডাটাবেজ থেকে কী আসছে তা চেক করার জন্য
   console.log("DEBUG: Plan ID being fetched:", planId);
   console.log("DEBUG: Plan Object received:", fetchedPlan);
@@ -55,7 +66,7 @@ const ApplyPage = async ({ params }) => {
   const plan = fetchedPlan || { name: 'Free', maxApplicationsPerMonth: 3 };
 
   // ৪. লিমিট ক্যালকুলেশন
-  const limit = plan?.maxApplicationsPerMonth || 3; 
+  const limit = plan?.maxApplicationsPerMonth || 3;
   const limitReached = totalApplications >= limit;
   const progressPercentage = Math.min((totalApplications / limit) * 100, 100);
 
@@ -64,6 +75,7 @@ const ApplyPage = async ({ params }) => {
   }
 
   return (
+
     <main className="min-h-screen bg-zinc-50 py-10 dark:bg-zinc-950">
       <div className="mx-auto max-w-4xl px-4 md:px-6">
         <Link href={`/jobs/${id}`} className="group mb-8 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-100 dark:bg-zinc-900">
@@ -95,8 +107,10 @@ const ApplyPage = async ({ params }) => {
           </div>
         </div>
 
+
         {!limitReached ? (
-          <JobApply applicant={user} job={job} />
+
+          <JobApply applicant={normalizedUser} job={job} alreadyApplied={alreadyApplied} />
         ) : (
           <div className="rounded-3xl border border-violet-500/20 bg-violet-50 p-10 text-center dark:bg-violet-500/5">
             <h3 className="text-3xl font-bold mb-4 text-zinc-900 dark:text-white">Application Limit Reached</h3>

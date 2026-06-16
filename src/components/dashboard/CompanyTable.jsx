@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Table } from '@heroui/react';
 import { Check, Xmark } from '@gravity-ui/icons';
+import { updateCompanyStatus } from '@/lib/actions/companies';
 
 export default function CompanyTable({ companies }) {
     const [companyList, setCompanyList] = useState(companies);
@@ -15,35 +16,27 @@ export default function CompanyTable({ companies }) {
     const totalPages = Math.ceil(companyList.length / rowsPerPage);
 
     const handleStatusUpdate = async (id, newStatus) => {
-        console.log("Button clicked for ID:", id);
+    console.log("Button clicked for ID:", id);
 
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/companies/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus }),
-            });
+    try {
+        await updateCompanyStatus(id, {
+            status: newStatus
+        });
 
-            console.log("Response status:", res.status);
+        setCompanyList(prev =>
+            prev.map(company =>
+                company._id === id
+                    ? { ...company, status: newStatus }
+                    : company
+            )
+        );
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error("Update failed:", errorText);
-                return;
-            }
+        console.log("Status updated successfully");
 
-            setCompanyList(prev =>
-                prev.map(company =>
-                    company._id === id
-                        ? { ...company, status: newStatus }
-                        : company
-                )
-            );
-
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    };
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
 
     // লোগো বা নামের প্রথম অক্ষরের ফাংশন
     const getInitials = (name) => {
